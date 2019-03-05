@@ -39,12 +39,14 @@ module BigQuery
       # (HTTP Client is replaced in the near future HTTP::Client...)
       # https://github.com/google/google-api-ruby-client/issues/336#issuecomment-179400592
       if opts['faraday_option'].is_a?(Hash)
-        @client.request_options.timeout_sec = opts['faraday_option']['timeout']
-        @client.request_options.open_timeout_sec = opts['faraday_option']['open_timeout']
+        @client.client_options.read_timeout_sec = opts['faraday_option']['timeout']
+        @client.client_options.send_timeout_sec = opts['faraday_option']['timeout']
+        @client.client_options.open_timeout_sec = opts['faraday_option']['open_timeout']
       # We accept the request_option instead of faraday_option
       elsif opts['request_option'].is_a?(Hash)
-        @client.request_options.timeout_sec = opts['request_option']['timeout_sec']
-        @client.request_options.open_timeout_sec = opts['request_option']['open_timeout_sec']
+        @client.client_options.read_timeout_sec = opts['request_option']['timeout_sec']
+        @client.client_options.send_timeout_sec = opts['request_option']['timeout_sec']
+        @client.client_options.open_timeout_sec = opts['request_option']['open_timeout_sec']
       end
 
       scope = 'https://www.googleapis.com/auth/bigquery'
@@ -86,6 +88,8 @@ module BigQuery
     private
 
     def api(resp)
+      resp = {} unless resp.respond_to?(:to_h)
+
       data = deep_stringify_keys(resp.to_h)
       handle_error(data) if data && is_error?(data)
       data
